@@ -1,0 +1,7 @@
+# Ignorar carpetas de compilación de Java/Maven
+**/target/
+**/*.jar
+**/*.war
+
+# Ignorar configuraciones locales de editores
+.vscode/
