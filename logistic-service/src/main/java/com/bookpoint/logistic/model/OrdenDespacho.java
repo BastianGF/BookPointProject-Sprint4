@@ -48,4 +48,7 @@ public class OrdenDespacho {
 
     @Min(value = 1)
     private Integer cantidadFinal;
+
+    @Column(columnDefinition = "TEXT")
+    private String productos; // arvhivo JSON con la lista de productos
 }

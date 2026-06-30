@@ -1,0 +1,32 @@
+{
+  "productos": [
+    {
+      "id": 1,
+      "nombre": "Libro de Java",
+      "precio": 25000,
+      "stock": 50,
+      "categoria": "Educación"
+    },
+    {
+      "id": 2,
+      "nombre": "Cuaderno",
+      "precio": 5000,
+      "stock": 100,
+      "categoria": "Papelería"
+    },
+    {
+      "id": 3,
+      "nombre": "Lápiz",
+      "precio": 1500,
+      "stock": 200,
+      "categoria": "Papelería"
+    },
+    {
+      "id": 4,
+      "nombre": "Calculadora",
+      "precio": 15000,
+      "stock": 30,
+      "categoria": "Oficina"
+    }
+  ]
+}

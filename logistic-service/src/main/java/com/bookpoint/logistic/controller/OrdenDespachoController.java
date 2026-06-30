@@ -38,9 +38,12 @@ public class OrdenDespachoController {
     }
 
     @PostMapping
-    public ResponseEntity<OrdenDespacho> crear(@Valid @RequestBody OrdenDespacho orden, @RequestParam Long proveedorId) {
+    public ResponseEntity<OrdenDespacho> crear(
+            @Valid @RequestBody OrdenDespacho orden,
+            @RequestParam Long proveedorId,
+            @RequestParam(required = false) List<Integer> productoIds) { 
         try {
-            OrdenDespacho nueva = ordenDespachoService.crearOrden(orden, proveedorId);
+            OrdenDespacho nueva = ordenDespachoService.crearOrden(orden, proveedorId, productoIds);
             return new ResponseEntity<>(nueva, HttpStatus.CREATED);
         } catch (RuntimeException e) {
             if (e.getMessage() != null && e.getMessage().contains("Proveedor no encontrado")) {

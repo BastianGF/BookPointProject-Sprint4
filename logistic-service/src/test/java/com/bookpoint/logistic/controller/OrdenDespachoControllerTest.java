@@ -52,6 +52,7 @@ class OrdenDespachoControllerTest {
         ordenBase.setTipo("DOMICILIO");
         ordenBase.setCantidadSolicitada(10);
     }
+
     // Me aburri de agregar los datos para que espere 409, metodo auxiliar para solucionar eso y que no se repita codigo
     private OrdenDespacho crearOrdenValida() {
         OrdenDespacho orden = new OrdenDespacho();
@@ -138,7 +139,8 @@ class OrdenDespachoControllerTest {
         guardada.setCantidadConfirmada(10);
         guardada.setCantidadFinal(10);
 
-        Mockito.when(ordenDespachoService.crearOrden(any(OrdenDespacho.class), eq(1L)))
+        // Actualizacion de Mock para recibir 3 parametros (productoIds = any())
+        Mockito.when(ordenDespachoService.crearOrden(any(OrdenDespacho.class), eq(1L), any()))
                 .thenReturn(guardada);
 
         mockMvc.perform(post("/api/ordenes-despacho")
@@ -148,7 +150,7 @@ class OrdenDespachoControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", is(1)))
                 .andExpect(jsonPath("$.estadoDespacho", is("PENDIENTE")));
-    }
+        }
 
     @Test
     void testCrearOrdenProveedorNoEncontrado() throws Exception {
@@ -161,21 +163,23 @@ class OrdenDespachoControllerTest {
         nueva.setCantidadFinal(10);                   
         nueva.setUbicacionBodega("Bodega Test"); 
 
-        Mockito.when(ordenDespachoService.crearOrden(any(OrdenDespacho.class), eq(9999L)))
+        // Same thing de arriba
+        Mockito.when(ordenDespachoService.crearOrden(any(OrdenDespacho.class), eq(9999L), any()))
                 .thenThrow(new RuntimeException("Proveedor no encontrado"));
 
         mockMvc.perform(post("/api/ordenes-despacho")
                 .param("proveedorId", "9999")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(nueva))) // AHORA SI UN OBJETO VALIDO LA MADRE MIA QUE ME PARIO
+                .content(objectMapper.writeValueAsString(nueva)))
                 .andExpect(status().isNotFound());
     }
 
-    @Test
-    void testCrearOrdenConErrorInterno() throws Exception {
+     @Test
+     void testCrearOrdenConErrorInterno() throws Exception {
         OrdenDespacho nueva = crearOrdenValida();
 
-        Mockito.when(ordenDespachoService.crearOrden(any(OrdenDespacho.class), eq(1L)))
+        // Misma modif
+        Mockito.when(ordenDespachoService.crearOrden(any(OrdenDespacho.class), eq(1L), any()))
                 .thenThrow(new RuntimeException("Error inesperado"));
 
         mockMvc.perform(post("/api/ordenes-despacho")
@@ -232,7 +236,7 @@ class OrdenDespachoControllerTest {
     }
 
     // TEST PARA PUT /api/ordenes-despacho/{ordenId}/preparar-mercaderia
-    @Test
+@Test
     void testPrepararMercaderiaValido() throws Exception {
         OrdenDespacho preparada = new OrdenDespacho();
         preparada.setId(1L);
@@ -271,17 +275,30 @@ class OrdenDespachoControllerTest {
                 .andExpect(jsonPath("$.cantidadFinal", is(20)));
     }
 
-        @Test
-        void testCrearOrdenConErrorInesperado() throws Exception {
+    @Test
+    void testCrearOrdenConErrorInesperado() throws Exception {
         OrdenDespacho nueva = crearOrdenValida();
-
-        when(ordenDespachoService.crearOrden(any(OrdenDespacho.class), eq(1L)))
+        when(ordenDespachoService.crearOrden(any(OrdenDespacho.class), eq(1L), any()))
                 .thenThrow(new RuntimeException("Error de base de datos"));
 
         mockMvc.perform(post("/api/ordenes-despacho")
                 .param("proveedorId", "1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(nueva)))
-                .andExpect(status().isConflict());  // status 409 less go
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+        void testCrearOrdenConRuntimeExceptionSinMensajeDeProveedor() throws Exception {
+        OrdenDespacho nueva = crearOrdenValida();
+        
+        Mockito.when(ordenDespachoService.crearOrden(any(OrdenDespacho.class), eq(1L), any()))
+                .thenThrow(new RuntimeException("Error de base de datos"));  // ← Mensaje diferente
+
+        mockMvc.perform(post("/api/ordenes-despacho")
+                .param("proveedorId", "1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(nueva)))
+                .andExpect(status().isConflict());
     }
 }

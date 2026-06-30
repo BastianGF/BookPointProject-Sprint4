@@ -13,6 +13,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -95,7 +97,8 @@ class OrdenDespachoServiceTest {
         when(supplierClient.obtenerProveedorPorId(1L)).thenReturn(proveedor);
         when(ordenDespachoRepository.save(any(OrdenDespacho.class))).thenReturn(ordenBase);
 
-        OrdenDespacho resultado = ordenDespachoService.crearOrden(ordenBase, 1L);
+        // Modif por el JSON emulado
+        OrdenDespacho resultado = ordenDespachoService.crearOrden(ordenBase, 1L, null);
 
         assertThat(resultado).isNotNull();
         assertThat(resultado.getEstadoDespacho()).isEqualTo("PENDIENTE");
@@ -104,13 +107,14 @@ class OrdenDespachoServiceTest {
         verify(ordenDespachoRepository).save(any(OrdenDespacho.class));
     }
 
-    @Test
+        @Test
     void testCrearOrdenConProveedorInexistente() {
         when(supplierClient.obtenerProveedorPorId(9999L)).thenReturn(null);
 
-        assertThatThrownBy(() -> ordenDespachoService.crearOrden(ordenBase, 9999L))
-            .isInstanceOf(RuntimeException.class)
-            .hasMessageContaining("Proveedor no encontrado");
+        // otra modiff, null como tercer parametro
+        assertThatThrownBy(() -> ordenDespachoService.crearOrden(ordenBase, 9999L, null))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("Proveedor no encontrado");
 
         verify(supplierClient).obtenerProveedorPorId(9999L);
         verify(ordenDespachoRepository, never()).save(any(OrdenDespacho.class));
@@ -257,5 +261,68 @@ class OrdenDespachoServiceTest {
         assertThatThrownBy(() -> ordenDespachoService.registrarSalidaBodega(1L, 9999L, 10))
             .isInstanceOf(RuntimeException.class)
             .hasMessageContaining("Transportista con ID 9999 no existe");
+    }
+
+    // He aqui los test que voy a tener que poner unicamente por el maldito 92% por completar el flujo del software.
+
+    @Test
+    void testCrearOrdenConProductos() {
+        // esto e para Configurar proveedor
+        ProveedorDTO proveedor = new ProveedorDTO();
+        proveedor.setId(1L);
+        proveedor.setNombre("Proveedor Test");
+
+        // esto para lista de IDs de productos
+        List<Integer> productoIds = Arrays.asList(1, 3);
+
+        // esto para configurar mocks
+        when(supplierClient.obtenerProveedorPorId(1L)).thenReturn(proveedor);
+        when(ordenDespachoRepository.save(any(OrdenDespacho.class))).thenReturn(ordenBase);
+
+        // para ejecutar
+        OrdenDespacho resultado = ordenDespachoService.crearOrden(ordenBase, 1L, productoIds);
+
+        // para verificar
+        assertThat(resultado).isNotNull();
+        assertThat(resultado.getEstadoDespacho()).isEqualTo("PENDIENTE");
+        assertThat(resultado.getObservacionDespacho()).contains("Proveedor Test");
+        
+        // con esto se verificar que los productos se agregaron
+        assertThat(resultado.getProductos()).isNotNull();
+        assertThat(resultado.getProductos()).contains("Libro de Java");
+        assertThat(resultado.getProductos()).contains("Lápiz");
+        assertThat(resultado.getProductos()).doesNotContain("Cuaderno");
+        assertThat(resultado.getProductos()).doesNotContain("Calculadora");
+        
+        verify(supplierClient).obtenerProveedorPorId(1L);
+        verify(ordenDespachoRepository).save(any(OrdenDespacho.class));
+    }
+
+        @Test
+    void testCrearOrdenConListaDeProductosVacia() {
+        // Mismo tema de configurar proveedor
+        ProveedorDTO proveedor = new ProveedorDTO();
+        proveedor.setId(1L);
+        proveedor.setNombre("Proveedor Test");
+
+        // Aqui se crea una lista VACÍA de productos (hasta Collection meti, que fuerte)
+        List<Integer> productoIds = Collections.emptyList();
+
+        // para configurar mocks
+        when(supplierClient.obtenerProveedorPorId(1L)).thenReturn(proveedor);
+        when(ordenDespachoRepository.save(any(OrdenDespacho.class))).thenReturn(ordenBase);
+
+        // EJECUTA
+        OrdenDespacho resultado = ordenDespachoService.crearOrden(ordenBase, 1L, productoIds);
+
+        // verif
+        assertThat(resultado).isNotNull();
+        assertThat(resultado.getEstadoDespacho()).isEqualTo("PENDIENTE");
+        
+        // "Perdona.. los productos deben ser null.. NO SE AGREGARON"
+        assertThat(resultado.getProductos()).isNull();
+        
+        verify(supplierClient).obtenerProveedorPorId(1L);
+        verify(ordenDespachoRepository).save(any(OrdenDespacho.class));
     }
 }

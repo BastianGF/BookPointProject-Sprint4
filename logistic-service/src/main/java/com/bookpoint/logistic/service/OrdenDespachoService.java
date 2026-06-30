@@ -6,6 +6,7 @@ import com.bookpoint.logistic.model.OrdenDespacho;
 import com.bookpoint.logistic.model.Transportista;
 import com.bookpoint.logistic.repository.OrdenDespachoRepository;
 import com.bookpoint.logistic.repository.TransportistaRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.transaction.Transactional;
 
@@ -14,8 +15,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -42,7 +45,7 @@ public class OrdenDespachoService {
         return ordenDespachoRepository.findById(id);
     }
 
-    public OrdenDespacho crearOrden(OrdenDespacho orden, Long proveedorId) {
+    public OrdenDespacho crearOrden(OrdenDespacho orden, Long proveedorId, List<Integer> productoIds) {
         logger.info("Creando orden de despacho, consultando proveedor id: {} en SupplierService", proveedorId);
         ProveedorDTO proveedor = supplierClient.obtenerProveedorPorId(proveedorId);
         if (proveedor == null) {
@@ -53,6 +56,12 @@ public class OrdenDespachoService {
         orden.setFechaCreacion(new Date());
         orden.setEstadoDespacho("PENDIENTE");
         orden.setObservacionDespacho("Proveedor asignado: " + proveedor.getNombre());
+
+        if (productoIds != null && !productoIds.isEmpty()) {
+            String productosJson = obtenerProductosPorIds(productoIds);
+            orden.setProductos(productosJson);
+        }
+
         return ordenDespachoRepository.save(orden);
     }
 
@@ -107,5 +116,28 @@ public class OrdenDespachoService {
         orden.setEstadoDespacho("DESPACHADO");
         return ordenDespachoRepository.save(orden);
     }
+
+    private String obtenerProductosPorIds(List<Integer> productoIds) {
+    try {
+        // Aqui se supone que simula la llamada a CatalogService (usando el arvhico JSON que se creo antes)
+        List<Map<String, Object>> productosSimulados = Arrays.asList(
+                Map.of("id", 1, "nombre", "Libro de Java", "precio", 25000),
+                Map.of("id", 2, "nombre", "Cuaderno", "precio", 5000),
+                Map.of("id", 3, "nombre", "Lápiz", "precio", 1500),
+                Map.of("id", 4, "nombre", "Calculadora", "precio", 15000)
+        );
+
+        // Filtrar productos por IDs
+        List<Map<String, Object>> productosSeleccionados = productosSimulados.stream()
+                .filter(p -> productoIds.contains(p.get("id")))
+                .toList();
+
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.writeValueAsString(productosSeleccionados);
+    } catch (Exception e) {
+        logger.error("Error al obtener productos: {}", e.getMessage());
+        return "[]";
+    }
+}
 
 }
