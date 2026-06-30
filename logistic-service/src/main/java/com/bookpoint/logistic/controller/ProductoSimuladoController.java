@@ -1,5 +1,10 @@
 package com.bookpoint.logistic.controller;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -7,7 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Arrays;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -15,23 +20,47 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/productos")
 public class ProductoSimuladoController {
-    // Lista de productos para emular (por favor funciona)
-    private static final List<Map<String, Object>> PRODUCTOS = Arrays.asList(
-            Map.of("id", 1, "nombre", "Libro de Java", "precio", 25000, "stock", 50, "categoria", "Educación"),
-            Map.of("id", 2, "nombre", "Cuaderno", "precio", 5000, "stock", 100, "categoria", "Papelería"),
-            Map.of("id", 3, "nombre", "Lápiz", "precio", 1500, "stock", 200, "categoria", "Papelería"),
-            Map.of("id", 4, "nombre", "Calculadora", "precio", 15000, "stock", 30, "categoria", "Oficina"),
-            Map.of("id", 5, "nombre", "Libro de Python", "precio", 45000, "stock", 35, "categoria", "Educacion")
-    );
+
+    private static final Logger logger = LoggerFactory.getLogger(ProductoSimuladoController.class);
+    private static List<Map<String, Object>> PRODUCTOS = null;
+
+    // Método para cargar los productos desde el JSON
+    private List<Map<String, Object>> getProductos() {
+        if (PRODUCTOS == null) {
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                InputStream inputStream = getClass().getResourceAsStream("/productos.json");
+                if (inputStream == null) {
+                    logger.error("No se encontró el archivo productos.json en resources");
+                    return List.of();
+                }
+                JsonNode root = mapper.readTree(inputStream);
+                PRODUCTOS = mapper.convertValue(
+                    root.findValue("productos"),
+                    new TypeReference<List<Map<String, Object>>>() {}
+                );
+                logger.info("Productos cargados correctamente: {}", PRODUCTOS.size());
+            } catch (Exception e) {
+                logger.error("Error al cargar productos: {}", e.getMessage());
+                PRODUCTOS = List.of();
+            }
+        }
+        return PRODUCTOS;
+    }
 
     @GetMapping
     public ResponseEntity<List<Map<String, Object>>> listarProductos() {
-        return new ResponseEntity<>(PRODUCTOS, HttpStatus.OK);
+        List<Map<String, Object>> productos = getProductos();
+        if (productos.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(productos, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Map<String, Object>> obtenerProductoPorId(@PathVariable Integer id) {
-        Optional<Map<String, Object>> producto = PRODUCTOS.stream()
+        List<Map<String, Object>> productos = getProductos();
+        Optional<Map<String, Object>> producto = productos.stream()
                 .filter(p -> p.get("id").equals(id))
                 .findFirst();
         return producto.map(ResponseEntity::ok)

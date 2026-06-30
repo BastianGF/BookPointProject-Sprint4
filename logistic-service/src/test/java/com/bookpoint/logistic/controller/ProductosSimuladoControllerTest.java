@@ -28,7 +28,7 @@ class ProductoSimuladoControllerTest {
     void testListarProductos() throws Exception {
         mockMvc.perform(get("/api/productos"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(5)))
+                .andExpect(jsonPath("$", hasSize(4)))
                 .andExpect(jsonPath("$[0].id", is(1)))
                 .andExpect(jsonPath("$[0].nombre", is("Libro de Java")))
                 .andExpect(jsonPath("$[1].id", is(2)))

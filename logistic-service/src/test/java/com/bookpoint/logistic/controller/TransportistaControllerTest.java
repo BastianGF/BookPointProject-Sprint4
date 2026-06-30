@@ -32,35 +32,34 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 class TransportistaControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+        @Autowired
+        private MockMvc mockMvc;
 
-    @MockBean
-    private TransportistaService transportistaService;
+        @MockBean
+        private TransportistaService transportistaService;
 
-    @MockBean
-    private RutaService rutaService;
+        @MockBean
+        private RutaService rutaService;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+        @Autowired
+        private ObjectMapper objectMapper;
 
-    @BeforeEach
-    void setUp() {
+        @BeforeEach
+        void setUp() {
         Mockito.reset(transportistaService, rutaService);
-    }
+        }
 
-    // ========== TESTS CRUD TRANSPORTISTA ==========
 
-    @Test
-    void testListarVacio() throws Exception {
+        @Test
+        void testListarVacio() throws Exception {
         when(transportistaService.listarTransportistas()).thenReturn(new ArrayList<>());
 
         mockMvc.perform(get("/api/transportistas"))
                 .andExpect(status().isNoContent());
-    }
+        }
 
-    @Test
-    void testListarConDatos() throws Exception {
+        @Test
+        void testListarConDatos() throws Exception {
         List<Transportista> lista = Arrays.asList(
                 new Transportista(1L, "Transportes Alfa", "11111111-1", "911111111", true),
                 new Transportista(2L, "Transportes Beta", "22222222-2", "922222222", false)
@@ -72,10 +71,10 @@ class TransportistaControllerTest {
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].nombre", is("Transportes Alfa")))
                 .andExpect(jsonPath("$[1].nombre", is("Transportes Beta")));
-    }
+        }   
 
-    @Test
-    void testBuscarPorIdExistente() throws Exception {
+        @Test
+        void testBuscarPorIdExistente() throws Exception {
         Transportista t = new Transportista(1L, "Transportes Gamma", "33333333-3", "933333333", true);
         when(transportistaService.obtainPorId(1L)).thenReturn(t);
 
@@ -83,18 +82,18 @@ class TransportistaControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(1)))
                 .andExpect(jsonPath("$.nombre", is("Transportes Gamma")));
-    }
+        }
 
-    @Test
-    void testBuscarPorIdInexistente() throws Exception {
+        @Test
+        void testBuscarPorIdInexistente() throws Exception {
         when(transportistaService.obtainPorId(9999L)).thenReturn(null);
 
         mockMvc.perform(get("/api/transportistas/9999"))
                 .andExpect(status().isNotFound());
-    }
+        }
 
-    @Test
-    void testRegistrarValido() throws Exception {
+        @Test
+        void testRegistrarValido() throws Exception {
         Transportista nuevo = new Transportista(null, "Transportes Delta", "44444444-4", "944444444", true);
         Transportista guardado = new Transportista(3L, "Transportes Delta", "44444444-4", "944444444", true);
         
@@ -105,20 +104,20 @@ class TransportistaControllerTest {
                 .content(objectMapper.writeValueAsString(nuevo)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", is(3)));
-    }
+        }
 
-    @Test
-    void testRegistrarConNombreVacio() throws Exception {
+        @Test
+        void testRegistrarConNombreVacio() throws Exception {
         Transportista invalido = new Transportista(null, "", "55555555-5", "955555555", true);
 
         mockMvc.perform(post("/api/transportistas")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(invalido)))
                 .andExpect(status().isBadRequest());
-    }
+        }
 
-    @Test
-    void testActualizarExistente() throws Exception {
+        @Test
+        void testActualizarExistente() throws Exception {
         Transportista actualizado = new Transportista(1L, "Modificado", "11111111-1", "911111111", false);
         when(transportistaService.updateTransportista(eq(1L), any(Transportista.class))).thenReturn(actualizado);
 
@@ -127,36 +126,36 @@ class TransportistaControllerTest {
                 .content(objectMapper.writeValueAsString(actualizado)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.nombre", is("Modificado")));
-    }
+        }
 
-    @Test
-    void testActualizarInexistente() throws Exception {
+        @Test
+        void testActualizarInexistente() throws Exception {
         when(transportistaService.updateTransportista(eq(9999L), any(Transportista.class))).thenReturn(null);
 
         mockMvc.perform(put("/api/transportistas/9999")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(new Transportista())))
                 .andExpect(status().isNotFound());
-    }
+        }
 
-    @Test
-    void testEliminarExistente() throws Exception {
+        @Test
+        void testEliminarExistente() throws Exception {
         when(transportistaService.deleteTransportista(1L)).thenReturn(true);
 
         mockMvc.perform(delete("/api/transportistas/1"))
                 .andExpect(status().isNoContent());
-    }
+        }
 
-    @Test
-    void testEliminarInexistente() throws Exception {
-        when(transportistaService.deleteTransportista(9999L)).thenReturn(false);
+        @Test
+        void testEliminarInexistente() throws Exception {
+                when(transportistaService.deleteTransportista(9999L)).thenReturn(false);
 
         mockMvc.perform(delete("/api/transportistas/9999"))
                 .andExpect(status().isNotFound());
-    }
+        }
 
-    @Test
-    void testAsignarRutaValida() throws Exception {
+        @Test
+        void testAsignarRutaValida() throws Exception {
         Ruta ruta = new Ruta();
         ruta.setOrigen("Santiago");
         ruta.setDestino("Valparaíso");
@@ -176,10 +175,10 @@ class TransportistaControllerTest {
                 .andExpect(jsonPath("$.id", is(1)))
                 .andExpect(jsonPath("$.origen", is("Santiago")))
                 .andExpect(jsonPath("$.destino", is("Valparaíso")));
-    }
+        }
 
-    @Test
-    void testAsignarRutaTransportistaInexistente() throws Exception {
+        @Test
+        void testAsignarRutaTransportistaInexistente() throws Exception {
         Ruta ruta = new Ruta();
         ruta.setOrigen("Santiago");
         ruta.setDestino("Valparaíso");
@@ -191,11 +190,11 @@ class TransportistaControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(ruta)))
                 .andExpect(status().isNotFound());
-    }
+        }
 
 
-    @Test
-    void testListarRutasConDatos() throws Exception {
+        @Test
+        void testListarRutasConDatos() throws Exception {
         Transportista t = new Transportista(1L, "Transportista", "11111111-1", "911111111", true);
         List<Ruta> rutas = Arrays.asList(
                 new Ruta(1L, "Ruta1", "Santiago", "Valparaíso", "PENDIENTE", 1L, t),
@@ -208,17 +207,17 @@ class TransportistaControllerTest {
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].origen", is("Santiago")))
                 .andExpect(jsonPath("$[1].origen", is("Concepción")));
-    }
+        }
 
-    @Test
+        @Test
         void testListarRutasVacio() throws Exception {
         when(rutaService.listarRutas()).thenReturn(new ArrayList<>());
         mockMvc.perform(get("/api/transportistas/rutas"))
                 .andExpect(status().isNoContent());
         }
 
-    @Test
-    void testListarRutasPorSucursal() throws Exception {
+        @Test
+        void testListarRutasPorSucursal() throws Exception {
         Transportista t = new Transportista(1L, "Transportista", "11111111-1", "911111111", true);
         List<Ruta> rutas = Arrays.asList(
                 new Ruta(1L, "Ruta1", "Santiago", "Valparaíso", "PENDIENTE", 1L, t)
@@ -230,11 +229,11 @@ class TransportistaControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].sucursalId", is(1)));
-    }
+        }
 
-    // GET /api/transportistas/{rutaId}/ruta
-    @Test
-    void testObtenerRutaExistente() throws Exception {
+        // GET /api/transportistas/{rutaId}/ruta
+        @Test
+        void testObtenerRutaExistente() throws Exception {
         Transportista t = new Transportista(1L, "Transportista", "11111111-1", "911111111", true);
         Ruta ruta = new Ruta(1L, "Ruta Test", "Rancagua", "San Fernando", "PENDIENTE", 1L, t);
         when(rutaService.buscarPorId(1L)).thenReturn(Optional.of(ruta));
@@ -242,19 +241,19 @@ class TransportistaControllerTest {
         mockMvc.perform(get("/api/transportistas/1/ruta"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.destino", is("San Fernando")));
-    }
+        }
 
-    @Test
-    void testObtenerRutaInexistente() throws Exception {
-        when(rutaService.buscarPorId(9999L)).thenReturn(Optional.empty());
+        @Test
+        void testObtenerRutaInexistente() throws Exception {
+                when(rutaService.buscarPorId(9999L)).thenReturn(Optional.empty());
 
         mockMvc.perform(get("/api/transportistas/9999/ruta"))
                 .andExpect(status().isNotFound());
-    }
+        }
 
-    // PUT /api/transportistas/{rutaId}/ruta
-    @Test
-    void testActualizarRutaValida() throws Exception {
+        // PUT /api/transportistas/{rutaId}/ruta
+        @Test
+        void testActualizarRutaValida() throws Exception {
         Ruta datos = new Ruta();
         datos.setOrigen("Rancagua");
         datos.setDestino("San Fernando");
@@ -269,10 +268,10 @@ class TransportistaControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.origen", is("Rancagua")))
                 .andExpect(jsonPath("$.destino", is("San Fernando")));
-    }
+        }
 
-    @Test
-    void testActualizarRutaEstadoNoPendiente() throws Exception {
+        @Test
+        void testActualizarRutaEstadoNoPendiente() throws Exception {
         Ruta datos = new Ruta();
         datos.setOrigen("Rancagua");
         datos.setDestino("San Fernando");
@@ -284,5 +283,29 @@ class TransportistaControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(datos)))
                 .andExpect(status().isConflict());
-    }
+        }
+
+        @Test
+        void testReactivarTransportistaExistente() throws Exception {
+        Transportista transportistaReactivado = new Transportista();
+        transportistaReactivado.setId(1L);
+        transportistaReactivado.setNombre("Juan Reactivado");
+        transportistaReactivado.setDisponible(true);
+
+        when(transportistaService.reactivarTransportista(1L)).thenReturn(transportistaReactivado);
+
+        mockMvc.perform(patch("/api/transportistas/1/reactivar"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(1)))
+                .andExpect(jsonPath("$.disponible", is(true)));
+        }
+
+        @Test
+        void testReactivarTransportistaInexistente() throws Exception {
+        when(transportistaService.reactivarTransportista(9999L))
+                .thenThrow(new RuntimeException("Transportista con ID 9999 no existe"));
+
+        mockMvc.perform(patch("/api/transportistas/9999/reactivar"))
+                .andExpect(status().isNotFound());
+        }
 }

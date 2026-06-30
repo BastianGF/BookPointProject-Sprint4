@@ -98,4 +98,14 @@ public class TransportistaController {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
+
+    @PatchMapping("/{id}/reactivar")
+    public ResponseEntity<Transportista> reactivarTransportista(@PathVariable Long id) {
+        try {
+            Transportista reactivado = transportistaService.reactivarTransportista(id);
+            return new ResponseEntity<>(reactivado, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
 }

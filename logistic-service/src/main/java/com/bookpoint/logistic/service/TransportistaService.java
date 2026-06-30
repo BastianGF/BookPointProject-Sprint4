@@ -22,8 +22,8 @@ public class TransportistaService {
     private TransportistaRepository transportistaRepository;
 
     public List<Transportista> listarTransportistas() {
-        logger.info("Listando todos los transportistas");
-        return transportistaRepository.findAll();
+        logger.info("Listando transportistas disponibles");
+        return transportistaRepository.findByDisponible(true);
     }
 
     public Transportista obtainPorId(Long id) {
@@ -59,5 +59,13 @@ public class TransportistaService {
     public List<Transportista> listTransportistasDisponibles() {
         logger.info("Listando transportistas disponibles");
         return transportistaRepository.findByDisponible(true);
+    }
+
+    public Transportista reactivarTransportista(Long id) {
+        logger.info("Reactivando transportista con id: {}", id);
+        Transportista transportista = transportistaRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Transportista con ID " + id + " no existe"));
+        transportista.setDisponible(true);
+        return transportistaRepository.save(transportista);
     }
 }

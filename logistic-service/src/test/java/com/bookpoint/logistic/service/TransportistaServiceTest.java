@@ -91,11 +91,12 @@ class TransportistaServiceTest {
     void testListarTransportistas() {
         List<Transportista> transportistas = new ArrayList<>();
         transportistas.add(new Transportista(1L, "Juan", "22967384-4", "777777777", true));
-        when(transportistaRepository.findAll()).thenReturn(transportistas);
+        
+        when(transportistaRepository.findByDisponible(true)).thenReturn(transportistas);
 
         List<Transportista> resultado = transportistaService.listarTransportistas();
         assertThat(resultado).hasSize(1);
-        verify(transportistaRepository).findAll();
+        verify(transportistaRepository).findByDisponible(true);
     }
 
     // TEST 5: Para actualizar transportista válido
@@ -158,5 +159,42 @@ class TransportistaServiceTest {
         List<Transportista> resultado = transportistaService.listTransportistasDisponibles();
         assertThat(resultado).isNotEmpty();
         verify(transportistaRepository).findByDisponible(true);
+    }
+
+    @Test
+    void testReactivarTransportistaExitoso() {
+        // 1. Crear transportista inactivo
+        Transportista transportistaInactivo = new Transportista();
+        transportistaInactivo.setId(1L);
+        transportistaInactivo.setNombre("Juan Inactivo");
+        transportistaInactivo.setDisponible(false);
+
+        // 2. Mock del repositorio (cuando busca por ID, devuelve el inactivo)
+        when(transportistaRepository.findById(1L)).thenReturn(Optional.of(transportistaInactivo));
+        
+        // 3. Mock del repositorio (cuando guarda, devuelve el mismo objeto)
+        when(transportistaRepository.save(any(Transportista.class))).thenReturn(transportistaInactivo);
+
+        // 4. Ejecutar método reactivar
+        Transportista reactivado = transportistaService.reactivarTransportista(1L);
+
+        // 5. Verificar que el estado cambió a true
+        assertThat(reactivado.getDisponible()).isTrue();
+        verify(transportistaRepository).findById(1L);
+        verify(transportistaRepository).save(any(Transportista.class));
+    }
+
+    @Test
+    void testReactivarTransportistaInexistente() {
+        // 1. Mock del repositorio (cuando busca por ID, no encuentra nada)
+        when(transportistaRepository.findById(9999L)).thenReturn(Optional.empty());
+
+        // 2. Ejecutar método y esperar excepción
+        assertThatThrownBy(() -> transportistaService.reactivarTransportista(9999L))
+            .isInstanceOf(RuntimeException.class)
+            .hasMessageContaining("Transportista con ID 9999 no existe");
+
+        verify(transportistaRepository).findById(9999L);
+        verify(transportistaRepository, never()).save(any(Transportista.class));
     }
 }

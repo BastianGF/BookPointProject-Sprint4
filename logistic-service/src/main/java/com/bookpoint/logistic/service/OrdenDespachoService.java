@@ -92,8 +92,11 @@ public class OrdenDespachoService {
         logger.info("Preparando mercadería para orden {}", ordenId);
         OrdenDespacho orden = ordenDespachoRepository.findById(ordenId)
             .orElseThrow(() -> new RuntimeException("Orden con ID " + ordenId + " no existe"));
-        if (!"PENDIENTE".equals(orden.getEstadoDespacho())) 
-            throw new RuntimeException("Orden no en estado PENDIENTE");
+        
+        if (!"PENDIENTE".equals(orden.getEstadoDespacho()) && !"CONFIRMADO".equals(orden.getEstadoDespacho())) {
+            throw new RuntimeException("Orden no en estado PENDIENTE o CONFIRMADO");
+        }
+        
         orden.setUbicacionBodega(ubicacionBodega);
         orden.setCantidadConfirmada(cantidadConfirmada);
         orden.setEstadoDespacho("PREPARADO");

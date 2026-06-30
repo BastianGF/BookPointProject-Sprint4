@@ -54,7 +54,7 @@ class TransportistaControllerIT {
     @Test
     void testListarTransportistas() throws Exception {
         Transportista t1 = new Transportista(null, "Transportista 1", "11111111-1", "911111111", true);
-        Transportista t2 = new Transportista(null, "Transportista 2", "22222222-2", "922222222", false);
+        Transportista t2 = new Transportista(null, "Transportista 2", "22222222-2", "922222222", true);
         transportistaRepository.save(t1);
         transportistaRepository.save(t2);
 
@@ -210,4 +210,27 @@ class TransportistaControllerIT {
                 .andExpect(status().isConflict());
     }
 
+    @Test
+    void testReactivarTransportistaEnBD() throws Exception {
+
+        Transportista t = new Transportista(null, "Juan", "12345678-9", "911111111", true);
+        Transportista guardado = transportistaRepository.save(t);
+        
+
+        guardado.setDisponible(false);
+        transportistaRepository.save(guardado);
+
+        mockMvc.perform(get("/api/transportistas"))
+                .andExpect(status().isNoContent());
+
+
+        mockMvc.perform(patch("/api/transportistas/" + guardado.getId() + "/reactivar"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.disponible", is(true)));
+
+        mockMvc.perform(get("/api/transportistas"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].nombre", is("Juan")));
+    }
 }

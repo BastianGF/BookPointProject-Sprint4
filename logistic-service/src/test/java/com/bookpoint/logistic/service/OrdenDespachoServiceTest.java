@@ -197,15 +197,15 @@ class OrdenDespachoServiceTest {
     }
 
     @Test
-    void testPrepararMercaderiaEstadoInvalido() {
-        OrdenDespacho ordenConfirmada = new OrdenDespacho();
-        ordenConfirmada.setEstadoDespacho("CONFIRMADO");
+    void testPrepararMercaderiaEstadoDespachadoInvalido() {
+        OrdenDespacho ordenDespachada = new OrdenDespacho();
+        ordenDespachada.setEstadoDespacho("DESPACHADO"); 
 
-        when(ordenDespachoRepository.findById(1L)).thenReturn(Optional.of(ordenConfirmada));
+        when(ordenDespachoRepository.findById(1L)).thenReturn(Optional.of(ordenDespachada));
 
         assertThatThrownBy(() -> ordenDespachoService.prepararMercaderia(1L, "Bodega", 10))
             .isInstanceOf(RuntimeException.class)
-            .hasMessageContaining("Orden no en estado PENDIENTE");
+            .hasMessageContaining("Orden no en estado PENDIENTE o CONFIRMADO");
     }
 
     // TEST PARA REGISTRAR SALIDA BODEGA 
