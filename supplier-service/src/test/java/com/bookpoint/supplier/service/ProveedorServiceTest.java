@@ -1,5 +1,6 @@
 package com.bookpoint.supplier.service;
 
+import com.bookpoint.supplier.dto.HistorialCompraDTO;
 import com.bookpoint.supplier.model.HistorialCompras;
 import com.bookpoint.supplier.model.Proveedor;
 import com.bookpoint.supplier.repository.HistorialComprasRepository;
@@ -14,6 +15,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -32,6 +34,9 @@ class ProveedorServiceTest {
 
     @Mock
     private HistorialComprasRepository historialComprasRepository;
+
+    @Mock
+    private HistorialComprasSimuladoService historialSimuladoService;
 
     @InjectMocks
     private ProveedorService proveedorService;
@@ -180,18 +185,26 @@ class ProveedorServiceTest {
 
     @Test
     void testObtenerHistorialComprasPorProveedorExitoso() {
-        List<HistorialCompras> historial = new ArrayList<>();
-        historial.add(historialBase);
-
         when(proveedorRepository.existsById(1L)).thenReturn(true);
-        when(historialComprasRepository.findByProveedorId(1L)).thenReturn(historial);
+        when(proveedorRepository.findById(1L)).thenReturn(Optional.of(new Proveedor()));
+        
+        // 2. Como el historial ahora viene del servicio simulado, no del repository,
+        // debemos mockear el nuevo servicio.
+        // 🔥 Asumiendo que inyectaste HistorialComprasSimuladoService
+        HistorialCompraDTO compra1 = new HistorialCompraDTO();
+        compra1.setId(1L);
+        compra1.setMontoTotal(1000.0);
+        List<HistorialCompraDTO> historialMock = Arrays.asList(compra1);
+        when(historialSimuladoService.obtenerPorProveedor(1L)).thenReturn(historialMock);
 
-        List<HistorialCompras> resultado = proveedorService.obtenerHistorialComprasPorProveedor(1L);
+        // 3. Ejecutar
+        List<HistorialCompraDTO> resultado = proveedorService.obtenerHistorialComprasPorProveedor(1L);
 
+        // 4. Verificar
         assertThat(resultado).hasSize(1);
         assertThat(resultado.get(0).getMontoTotal()).isEqualTo(1000.0);
         verify(proveedorRepository).existsById(1L);
-        verify(historialComprasRepository).findByProveedorId(1L);
+        verify(historialSimuladoService).obtenerPorProveedor(1L);
     }
 
     @Test
@@ -208,27 +221,40 @@ class ProveedorServiceTest {
 
     @Test
     void testRegistrarCompraAProveedorExitoso() {
-        when(proveedorRepository.findById(1L)).thenReturn(Optional.of(proveedorBase));
-        when(historialComprasRepository.save(any(HistorialCompras.class))).thenReturn(historialBase);
+        when(proveedorRepository.existsById(1L)).thenReturn(true);
+        
+        HistorialCompraDTO nuevaCompra = new HistorialCompraDTO();
+        nuevaCompra.setMontoTotal(500.0);
+        nuevaCompra.setDescripcionCompra("Compra test");
+        
+        HistorialCompraDTO compraGuardada = new HistorialCompraDTO();
+        compraGuardada.setId(1L);
+        compraGuardada.setMontoTotal(500.0);
+        when(historialSimuladoService.registrarCompra(any(HistorialCompraDTO.class))).thenReturn(compraGuardada);
 
-        HistorialCompras resultado = proveedorService.registrarCompraAProveedor(1L, historialBase);
+        HistorialCompraDTO resultado = proveedorService.registrarCompraAProveedor(1L, nuevaCompra);
 
         assertThat(resultado).isNotNull();
-        assertThat(resultado.getProveedor()).isEqualTo(proveedorBase);
-        verify(proveedorRepository).findById(1L);
-        verify(historialComprasRepository).save(any(HistorialCompras.class));
+        assertThat(resultado.getId()).isEqualTo(1L);
+        verify(proveedorRepository).existsById(1L);
+        verify(historialSimuladoService).registrarCompra(any(HistorialCompraDTO.class));
+    
     }
 
     @Test
     void testRegistrarCompraAProveedorInexistente() {
-        when(proveedorRepository.findById(9999L)).thenReturn(Optional.empty());
+        when(proveedorRepository.existsById(9999L)).thenReturn(false);
 
-        assertThatThrownBy(() -> proveedorService.registrarCompraAProveedor(9999L, historialBase))
+        HistorialCompraDTO nuevaCompra = new HistorialCompraDTO();
+        nuevaCompra.setMontoTotal(500.0);
+        nuevaCompra.setDescripcionCompra("Compra test");
+
+        assertThatThrownBy(() -> proveedorService.registrarCompraAProveedor(9999L, nuevaCompra))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("Proveedor con ID 9999 no existe");
 
-        verify(proveedorRepository).findById(9999L);
-        verify(historialComprasRepository, never()).save(any(HistorialCompras.class));
+        verify(proveedorRepository).existsById(9999L);
+        verify(historialSimuladoService, never()).registrarCompra(any(HistorialCompraDTO.class));
     }
 
     @Test

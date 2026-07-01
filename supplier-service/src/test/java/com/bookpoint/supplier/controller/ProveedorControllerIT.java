@@ -1,23 +1,29 @@
 package com.bookpoint.supplier.controller;
 
+import com.bookpoint.supplier.dto.HistorialCompraDTO;
 import com.bookpoint.supplier.model.HistorialCompras;
 import com.bookpoint.supplier.model.Proveedor;
 import com.bookpoint.supplier.repository.HistorialComprasRepository;
 import com.bookpoint.supplier.repository.ProveedorRepository;
+import com.bookpoint.supplier.service.HistorialComprasSimuladoService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Arrays;
 import java.util.Date;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -34,6 +40,10 @@ class ProveedorControllerIT {
 
     @Autowired
     private HistorialComprasRepository historialComprasRepository;
+
+    @MockBean
+    private HistorialComprasSimuladoService historialSimuladoService;   
+    
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -150,12 +160,16 @@ class ProveedorControllerIT {
         Proveedor proveedor = crearProveedorBase();
         Proveedor guardado = proveedorRepository.save(proveedor);
 
-        HistorialCompras historial = new HistorialCompras();
-        historial.setFechaCompra(new Date());
-        historial.setMontoTotal(1000.0);
-        historial.setDescripcionCompra("Compra de integración");
-        historial.setProveedor(guardado);
-        historialComprasRepository.save(historial);
+        // Solucion de que en vez de que intente guardarlo en DB haga la simulacion
+        HistorialCompraDTO historialMock = new HistorialCompraDTO();
+        historialMock.setId(1L);
+        historialMock.setProveedorId(guardado.getId());
+        historialMock.setFechaCompra(new Date());
+        historialMock.setMontoTotal(1000.0);
+        historialMock.setDescripcionCompra("Compra de integración");
+
+        when(historialSimuladoService.obtenerPorProveedor(guardado.getId()))
+                .thenReturn(Arrays.asList(historialMock));
 
         mockMvc.perform(get("/api/proveedores/" + guardado.getId() + "/historial-compras"))
                 .andExpect(status().isOk())
@@ -169,10 +183,20 @@ class ProveedorControllerIT {
         Proveedor proveedor = crearProveedorBase("11111111-1");
         Proveedor guardado = proveedorRepository.save(proveedor);
 
-        HistorialCompras nueva = new HistorialCompras();
+        HistorialCompraDTO nueva = new HistorialCompraDTO();
         nueva.setFechaCompra(new Date());
         nueva.setMontoTotal(2000.0);
         nueva.setDescripcionCompra("Nueva compra IT");
+
+        HistorialCompraDTO guardada = new HistorialCompraDTO();
+        guardada.setId(1L);
+        guardada.setProveedorId(guardado.getId());
+        guardada.setFechaCompra(new Date());
+        guardada.setMontoTotal(2000.0);
+        guardada.setDescripcionCompra("Nueva compra IT");
+
+        when(historialSimuladoService.registrarCompra(any(HistorialCompraDTO.class)))
+                .thenReturn(guardada);
 
         mockMvc.perform(post("/api/proveedores/" + guardado.getId() + "/historial-compras")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -181,7 +205,7 @@ class ProveedorControllerIT {
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.montoTotal", is(2000.0)))
                 .andExpect(jsonPath("$.descripcionCompra", is("Nueva compra IT")))
-                .andExpect(jsonPath("$.proveedor.id", is(guardado.getId().intValue())));
+                .andExpect(jsonPath("$.proveedorId", is(guardado.getId().intValue())));  // 🔥 CAMBIAR a proveedorId
     }
 
     @Test

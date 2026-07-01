@@ -1,5 +1,6 @@
 package com.bookpoint.supplier.service;
 
+import com.bookpoint.supplier.dto.HistorialCompraDTO;
 import com.bookpoint.supplier.model.HistorialCompras;
 import com.bookpoint.supplier.model.Proveedor;
 import com.bookpoint.supplier.repository.HistorialComprasRepository;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import java.util.Date;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,6 +26,9 @@ public class ProveedorService {
 
     @Autowired
     private HistorialComprasRepository historialComprasRepository;
+
+    @Autowired
+    private HistorialComprasSimuladoService historialSimuladoService;
 
     public Page<Proveedor> listarProveedores(PageRequest pageRequest) {
         logger.info("Listando proveedores activos - página {}, tamaño {}", 
@@ -73,20 +78,22 @@ public class ProveedorService {
         return true;
     }
 
-    public List<HistorialCompras> obtenerHistorialComprasPorProveedor(Long proveedorId) {
+    public List<HistorialCompraDTO> obtenerHistorialComprasPorProveedor(Long proveedorId) {
         logger.info("Obteniendo historial de compras para proveedor {}", proveedorId);
         if (!proveedorRepository.existsById(proveedorId)) {
             throw new RuntimeException("Proveedor con ID " + proveedorId + " no existe");
         }
-        return historialComprasRepository.findByProveedorId(proveedorId);
+        return historialSimuladoService.obtenerPorProveedor(proveedorId);
     }
 
-    public HistorialCompras registrarCompraAProveedor(Long proveedorId, HistorialCompras historial) {
+    public HistorialCompraDTO registrarCompraAProveedor(Long proveedorId, HistorialCompraDTO compraDTO) {
         logger.info("Registrando compra para proveedor {}", proveedorId);
-        Proveedor proveedor = proveedorRepository.findById(proveedorId)
-            .orElseThrow(() -> new RuntimeException("Proveedor con ID " + proveedorId + " no existe"));
-        historial.setProveedor(proveedor);
-        return historialComprasRepository.save(historial);
+        if (!proveedorRepository.existsById(proveedorId)) {
+            throw new RuntimeException("Proveedor con ID " + proveedorId + " no existe");
+        }
+        compraDTO.setProveedorId(proveedorId);
+        compraDTO.setFechaCompra(new Date());
+        return historialSimuladoService.registrarCompra(compraDTO);
     }
 
     public HistorialCompras obtenerHistorialCompraPorId(Long id) {

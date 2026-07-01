@@ -1,5 +1,6 @@
 package com.bookpoint.supplier.controller;
 
+import com.bookpoint.supplier.dto.HistorialCompraDTO;
 import com.bookpoint.supplier.model.HistorialCompras;
 import com.bookpoint.supplier.model.Proveedor;
 import com.bookpoint.supplier.service.ProveedorService;
@@ -208,15 +209,22 @@ class ProveedorControllerTest {
     // TESTS DE HISTORIAL DE COMPRAS
 
     @Test
-    void testObtenerHistorialProveedorExistente() throws Exception {
+        void testObtenerHistorialProveedorExistente() throws Exception {
+        // Con esto ya no usa la entidad, sino que uso el DTO
+        HistorialCompraDTO historialDTO = new HistorialCompraDTO();
+        historialDTO.setId(1L);
+        historialDTO.setMontoTotal(1000.0);
+        historialDTO.setDescripcionCompra("Compra test");
+        historialDTO.setProveedorId(1L);
+
         when(proveedorService.obtenerHistorialComprasPorProveedor(1L))
-                .thenReturn(Arrays.asList(historialBase));
+                .thenReturn(Arrays.asList(historialDTO));
 
         mockMvc.perform(get("/api/proveedores/1/historial-compras"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].montoTotal", is(1000.0)));
-    }
+        }
 
     @Test
     void testObtenerHistorialProveedorInexistente() throws Exception {
@@ -228,33 +236,39 @@ class ProveedorControllerTest {
     }
 
     @Test
-    void testRegistrarCompraAProveedorExistente() throws Exception {
-        HistorialCompras nueva = crearHistorialValido();
-        HistorialCompras guardada = new HistorialCompras();
+    void testRegistrarCompraAProveedor() throws Exception {
+        HistorialCompraDTO nueva = new HistorialCompraDTO();
+        nueva.setMontoTotal(1000.0);
+        nueva.setDescripcionCompra("Compra test");
+        
+        HistorialCompraDTO guardada = new HistorialCompraDTO();
         guardada.setId(1L);
-        guardada.setMontoTotal(1500.0);
+        guardada.setMontoTotal(1000.0);
 
-        when(proveedorService.registrarCompraAProveedor(eq(1L), any(HistorialCompras.class)))
-                .thenReturn(guardada);
+        when(proveedorService.registrarCompraAProveedor(eq(1L), any(HistorialCompraDTO.class))).thenReturn(guardada);
 
         mockMvc.perform(post("/api/proveedores/1/historial-compras")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(nueva)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", is(1)))
-                .andExpect(jsonPath("$.montoTotal", is(1500.0)));
+                .andExpect(jsonPath("$.montoTotal", is(1000.0)));
     }
 
     @Test
-    void testRegistrarCompraAProveedorInexistente() throws Exception {
-        HistorialCompras nueva = crearHistorialValido();
+        void testRegistrarCompraAProveedorInexistente() throws Exception {
+        HistorialCompraDTO nueva = new HistorialCompraDTO();
+        nueva.setMontoTotal(1500.0);
+        nueva.setDescripcionCompra("Nueva compra");
 
-        when(proveedorService.registrarCompraAProveedor(eq(9999L), any(HistorialCompras.class)))
+        when(proveedorService.registrarCompraAProveedor(eq(9999L), any(HistorialCompraDTO.class)))
                 .thenThrow(new RuntimeException("Proveedor con ID 9999 no existe"));
 
         mockMvc.perform(post("/api/proveedores/9999/historial-compras")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(nueva)))
                 .andExpect(status().isNotFound());
-    }
+        }
+
+
 }

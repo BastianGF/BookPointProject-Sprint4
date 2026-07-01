@@ -1,0 +1,34 @@
+{
+  "compras": [
+    {
+      "id": 1,
+      "proveedorId": 1,
+      "fechaCompra": "2026-06-01T10:00:00.000Z",
+      "montoTotal": 150000,
+      "descripcionCompra": "Compra de libros de texto",
+      "productos": [
+        {"nombre": "Libro de Java", "cantidad": 10, "precioUnitario": 15000}
+      ]
+    },
+    {
+      "id": 2,
+      "proveedorId": 1,
+      "fechaCompra": "2026-06-15T14:30:00.000Z",
+      "montoTotal": 85000,
+      "descripcionCompra": "Compra de material de oficina",
+      "productos": [
+        {"nombre": "Cuadernos", "cantidad": 50, "precioUnitario": 1700}
+      ]
+    },
+    {
+      "id": 3,
+      "proveedorId": 2,
+      "fechaCompra": "2026-06-20T09:15:00.000Z",
+      "montoTotal": 220000,
+      "descripcionCompra": "Compra de equipos de computación",
+      "productos": [
+        {"nombre": "Mouse", "cantidad": 20, "precioUnitario": 11000}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  esto no es un json valido porque no tiene comillas ni llaves correctas
+  "compras": [
+    {
+      "id": 1,
+      "proveedorId": 1,
+      "montoTotal": 1000.0
+    }
+  ]

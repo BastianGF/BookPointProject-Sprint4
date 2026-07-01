@@ -1,5 +1,6 @@
 package com.bookpoint.supplier.controller;
 
+import com.bookpoint.supplier.dto.HistorialCompraDTO;
 import com.bookpoint.supplier.model.HistorialCompras;
 import com.bookpoint.supplier.model.Proveedor;
 import com.bookpoint.supplier.service.ProveedorService;
@@ -68,10 +69,13 @@ public class ProveedorController {
     }
 
     @GetMapping("/{proveedorId}/historial-compras")
-    public ResponseEntity<List<HistorialCompras>> obtenerHistorial(@PathVariable Long proveedorId) {
+    public ResponseEntity<List<HistorialCompraDTO>> obtenerHistorial(@PathVariable Long proveedorId) {
         logger.info("GET /api/proveedores/{}/historial-compras", proveedorId);
         try {
-            List<HistorialCompras> historial = proveedorService.obtenerHistorialComprasPorProveedor(proveedorId);
+            List<HistorialCompraDTO> historial = proveedorService.obtenerHistorialComprasPorProveedor(proveedorId);
+            if (historial.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
             return new ResponseEntity<>(historial, HttpStatus.OK);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -79,10 +83,12 @@ public class ProveedorController {
     }
 
     @PostMapping("/{proveedorId}/historial-compras")
-    public ResponseEntity<HistorialCompras> registrarCompra(@PathVariable Long proveedorId, @Valid @RequestBody HistorialCompras historial) {
+    public ResponseEntity<HistorialCompraDTO> registrarCompra(
+            @PathVariable Long proveedorId,
+            @Valid @RequestBody HistorialCompraDTO compra) {
         logger.info("POST /api/proveedores/{}/historial-compras", proveedorId);
         try {
-            HistorialCompras nueva = proveedorService.registrarCompraAProveedor(proveedorId, historial);
+            HistorialCompraDTO nueva = proveedorService.registrarCompraAProveedor(proveedorId, compra);
             return new ResponseEntity<>(nueva, HttpStatus.CREATED);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
