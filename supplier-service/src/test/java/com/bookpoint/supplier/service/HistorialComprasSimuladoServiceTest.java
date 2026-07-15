@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -23,37 +24,37 @@ class HistorialComprasSimuladoServiceTest {
     @Mock
     private ObjectMapper objectMapperMock;
 
+    @InjectMocks
     private HistorialComprasSimuladoService service;
 
-    @BeforeEach
-    void setUp() {
-        service = new HistorialComprasSimuladoService(objectMapperMock);
-    }
-
-    // ============================================================
-    // TEST 1: CARGA EXITOSA (cubre logger.info)
-    // ============================================================
     @Test
-    void testCargarHistorial_Exitoso() throws Exception {
-        String jsonValido = "[{\"id\":1,\"proveedorId\":1,\"montoTotal\":1000.0,\"descripcionCompra\":\"Compra test\"}]";
-        InputStream inputStreamValido = new ByteArrayInputStream(jsonValido.getBytes());
+    void testCargarHistorial_ArchivoNoEncontrado() throws Exception {
+        HistorialComprasSimuladoService serviceReal = new HistorialComprasSimuladoService();
         
-        HistorialCompraDTO compraMock = new HistorialCompraDTO();
-        compraMock.setId(1L);
-        compraMock.setProveedorId(1L);
-        compraMock.setMontoTotal(1000.0);
-        compraMock.setDescripcionCompra("Compra test");
+        ReflectionTestUtils.setField(serviceReal, "historialCompras", null);
         
-        List<HistorialCompraDTO> historialMock = List.of(compraMock);
-        
-        when(objectMapperMock.readValue(any(InputStream.class), any(com.fasterxml.jackson.core.type.TypeReference.class)))
-                .thenReturn(historialMock);
-        
-        List<HistorialCompraDTO> resultado = service.obtenerPorProveedor(1L);
+        List<HistorialCompraDTO> resultado = serviceReal.obtenerPorProveedor(1L);
         
         assertThat(resultado).isNotNull();
-        assertThat(resultado).hasSize(1);
-        assertThat(resultado.get(0).getProveedorId()).isEqualTo(1L);
+        assertThat(resultado).isEmpty();
+    }
+
+    @Test
+    void testCargarHistorial_ErrorAlParsearJSON() throws Exception {
+        String jsonInvalido = "{ esto no es un json valido }";
+        InputStream inputStreamInvalido = new ByteArrayInputStream(jsonInvalido.getBytes());
+        
+        ObjectMapper mapperSpy = spy(new ObjectMapper());
+        doThrow(new RuntimeException("Error al parsear JSON"))
+                .when(mapperSpy)
+                .readValue(any(InputStream.class), any(com.fasterxml.jackson.core.type.TypeReference.class));
+
+        HistorialComprasSimuladoService serviceConMapper = new HistorialComprasSimuladoService(mapperSpy);
+
+        List<HistorialCompraDTO> resultado = serviceConMapper.obtenerPorProveedor(1L);
+        
+        assertThat(resultado).isNotNull();
+        assertThat(resultado).isEmpty();
     }
 
     @Test
@@ -74,6 +75,7 @@ class HistorialComprasSimuladoServiceTest {
 
     @Test
     void testObtenerPorProveedorExitoso() {
+        // 1. Crear un DTO
         HistorialCompraDTO compra = new HistorialCompraDTO();
         compra.setId(1L);
         compra.setProveedorId(1L);
@@ -86,15 +88,5 @@ class HistorialComprasSimuladoServiceTest {
 
         assertThat(resultado).hasSize(1);
         assertThat(resultado.get(0).getMontoTotal()).isEqualTo(1000.0);
-    }
-
-    @Test
-    void testObtenerPorProveedor_HistorialVacio() {
-        ReflectionTestUtils.setField(service, "historialCompras", List.of());
-
-        List<HistorialCompraDTO> resultado = service.obtenerPorProveedor(999L);
-
-        assertThat(resultado).isNotNull();
-        assertThat(resultado).isEmpty();
     }
 }

@@ -1,0 +1,25 @@
+{
+    "folders": [
+        {
+            "path": "api-gateway",
+            "name": "API Gateway"
+        },
+        {
+            "path": "logistic-service",
+            "name": "Logistic Service"
+        },
+        {
+            "path": "supplier-service",
+            "name": "Supplier Service"
+        },
+        {
+            "path": "sucursal-service",
+            "name": "Sucursal Service"
+        }
+    ],
+    "settings": {
+        "java.configuration.updateBuildConfiguration": "automatic",
+        "java.compile.nullAnalysis.mode": "automatic",
+        "java.autobuild.enabled": true
+    }
+}

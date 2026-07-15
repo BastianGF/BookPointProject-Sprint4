@@ -3,7 +3,10 @@ package com.bookpoint.logistic.controller;
 import com.bookpoint.logistic.model.Traslado;
 import com.bookpoint.logistic.model.Transportista;
 import com.bookpoint.logistic.repository.TrasladoRepository;
+import com.bookpoint.logistic.repository.EnvioRepository;
+import com.bookpoint.logistic.repository.IncidenciaRepository;
 import com.bookpoint.logistic.repository.OrdenDespachoRepository;
+import com.bookpoint.logistic.repository.RutaRepository;
 import com.bookpoint.logistic.repository.TransportistaRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,10 +44,22 @@ class TrasladoControllerIT {
     @Autowired
     private OrdenDespachoRepository ordenDespachoRepository;
 
+    @Autowired
+    private IncidenciaRepository incidenciaRepository;
+
+    @Autowired
+    private EnvioRepository envioRepository;
+
+    @Autowired
+    private RutaRepository rutaRepository;
+
     @BeforeEach
     void cleanDb() {
+        incidenciaRepository.deleteAll();
+        envioRepository.deleteAll();
         ordenDespachoRepository.deleteAll();
         trasladoRepository.deleteAll();
+        rutaRepository.deleteAll();
         transportistaRepository.deleteAll();
     }
 

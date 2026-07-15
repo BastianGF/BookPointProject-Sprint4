@@ -1,6 +1,7 @@
 package com.bookpoint.logistic.service;
 
-import com.bookpoint.logistic.controller.EnvioController;
+import com.bookpoint.logistic.client.SucursalClient;
+import com.bookpoint.logistic.dto.SucursalDTO;
 import com.bookpoint.logistic.model.Ruta;
 import com.bookpoint.logistic.model.Transportista;
 import com.bookpoint.logistic.repository.RutaRepository;
@@ -23,8 +24,12 @@ public class RutaService {
 
     @Autowired
     private RutaRepository rutaRepository;
+    
     @Autowired
     private TransportistaRepository transportistaRepository;
+
+    @Autowired
+    private SucursalClient sucursalClient;
 
     public List<Ruta> listarRutas() {
         return rutaRepository.findAll();
@@ -37,8 +42,18 @@ public class RutaService {
     @Transactional
     public Ruta asignarRutaATransportista(Long transportistaId, Ruta ruta) {
         logger.info("Asignando ruta a transportista {}", transportistaId);
+
         Transportista transportista = transportistaRepository.findById(transportistaId)
             .orElseThrow(() -> new RuntimeException("Transportista con ID " + transportistaId + " no existe"));
+        
+        if (ruta.getSucursalId() != null) {
+            SucursalDTO sucursal = sucursalClient.obtenerSucursalPorId(ruta.getSucursalId());
+            if (sucursal == null) {
+                throw new RuntimeException("Sucursal con ID " + ruta.getSucursalId() + " no existe");
+            }
+            logger.info("Sucursal encontrada: {} - {}", sucursal.getId(), sucursal.getNombre());
+        }
+        
         ruta.setTransportista(transportista);
         return rutaRepository.save(ruta);
     }

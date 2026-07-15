@@ -1,5 +1,7 @@
 package com.bookpoint.logistic.controller;
 
+import com.bookpoint.logistic.client.SucursalClient;
+import com.bookpoint.logistic.dto.SucursalDTO;
 import com.bookpoint.logistic.model.Ruta;
 import com.bookpoint.logistic.model.Transportista;
 import com.bookpoint.logistic.repository.RutaRepository;
@@ -10,12 +12,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -32,6 +36,8 @@ class TransportistaControllerIT {
     private ObjectMapper objectMapper;
     @Autowired
     private RutaRepository rutaRepository;
+    @MockBean
+    private SucursalClient sucursalClient;
 
     @BeforeEach
     void cleanDb() {
@@ -100,6 +106,11 @@ class TransportistaControllerIT {
 
     @Test
     void testAsignarRuta() throws Exception {
+        SucursalDTO sucursalMock = new SucursalDTO();
+        sucursalMock.setId(1L);
+        sucursalMock.setNombre("Sucursal Test");
+        when(sucursalClient.obtenerSucursalPorId(1L)).thenReturn(sucursalMock);
+        
         Transportista t = new Transportista(null, "Juan Pérez", "12345678-9", "987654321", true);
         Transportista guardado = transportistaRepository.save(t);
 

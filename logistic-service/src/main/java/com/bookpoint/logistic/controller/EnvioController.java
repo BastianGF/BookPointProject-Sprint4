@@ -35,7 +35,7 @@ public class EnvioController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Envio> buscar(@PathVariable Long id) {
+    public ResponseEntity<Envio> buscar(@PathVariable("id") Long id) {
         Envio e = envioService.buscarPorId(id).orElse(null);
         if (e == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(e, HttpStatus.OK);
@@ -52,14 +52,14 @@ public class EnvioController {
     }
 
     @PutMapping("/{id}/estado")
-    public ResponseEntity<Envio> actualizarEstado(@PathVariable Long id, @RequestParam String estado) {
+    public ResponseEntity<Envio> actualizarEstado(@PathVariable("id") Long id, @RequestParam String estado) {
         Envio envio = envioService.actualizarEstadoEnvio(id, estado);
         if (envio == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(envio, HttpStatus.OK);
     }
 
     @PostMapping("/{envioId}/incidencias")
-    public ResponseEntity<Incidencia> registrarIncidencia(@PathVariable Long envioId, @Valid @RequestBody Incidencia incidencia) {
+    public ResponseEntity<Incidencia> registrarIncidencia(@PathVariable("envioId") Long envioId, @Valid @RequestBody Incidencia incidencia) {
         logger.info("POST /api/envios/{}/incidencias", envioId);
         Incidencia nuevaIncidencia = incidenciaService.registrarIncidenciaEnEnvio(envioId, incidencia);
         return new ResponseEntity<>(nuevaIncidencia, HttpStatus.CREATED);

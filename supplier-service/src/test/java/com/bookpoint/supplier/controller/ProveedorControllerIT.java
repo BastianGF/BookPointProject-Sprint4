@@ -3,8 +3,11 @@ package com.bookpoint.supplier.controller;
 import com.bookpoint.supplier.dto.HistorialCompraDTO;
 import com.bookpoint.supplier.model.HistorialCompras;
 import com.bookpoint.supplier.model.Proveedor;
+import com.bookpoint.supplier.repository.EvaluacionProveedorRepository;
 import com.bookpoint.supplier.repository.HistorialComprasRepository;
 import com.bookpoint.supplier.repository.ProveedorRepository;
+import com.bookpoint.supplier.repository.RecepcionMercaderiaRepository;
+import com.bookpoint.supplier.repository.SolicitudReposicionRepository;
 import com.bookpoint.supplier.service.HistorialComprasSimuladoService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,6 +44,15 @@ class ProveedorControllerIT {
     @Autowired
     private HistorialComprasRepository historialComprasRepository;
 
+    @Autowired
+    private RecepcionMercaderiaRepository recepcionRepository;
+
+    @Autowired
+    private SolicitudReposicionRepository solicitudRepository;
+
+    @Autowired
+    private EvaluacionProveedorRepository evaluacionRepository;
+
     @MockBean
     private HistorialComprasSimuladoService historialSimuladoService;   
     
@@ -50,7 +62,10 @@ class ProveedorControllerIT {
 
     @BeforeEach
     void cleanDb() {
+        evaluacionRepository.deleteAll();
         historialComprasRepository.deleteAll();
+        recepcionRepository.deleteAll();
+        solicitudRepository.deleteAll();
         proveedorRepository.deleteAll();
     }
 

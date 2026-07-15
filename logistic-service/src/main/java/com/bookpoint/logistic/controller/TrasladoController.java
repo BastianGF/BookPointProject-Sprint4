@@ -32,7 +32,7 @@ public class TrasladoController {
     }
     
     @PutMapping("/{trasladoId}/asignar-transportista")
-    public ResponseEntity<Traslado> asignarTransportista(@PathVariable Long trasladoId, @RequestParam Long transportistaId) {
+    public ResponseEntity<Traslado> asignarTransportista(@PathVariable("trasladoId") Long trasladoId, @RequestParam Long transportistaId) {
         logger.info("PUT /api/traslados/{}/asignar-transportista - transportista {}", trasladoId, transportistaId);
         try {
             Traslado traslado = trasladoService.asignarTransportista(trasladoId, transportistaId);
@@ -44,7 +44,7 @@ public class TrasladoController {
     }
     
     @PutMapping("/{trasladoId}/confirmar-salida")
-    public ResponseEntity<Traslado> confirmarSalida(@PathVariable Long trasladoId) {
+    public ResponseEntity<Traslado> confirmarSalida(@PathVariable("trasladoId") Long trasladoId) {
         logger.info("PUT /api/traslados/{}/confirmar-salida", trasladoId);
         try {
             Traslado traslado = trasladoService.confirmarSalida(trasladoId);
@@ -56,7 +56,7 @@ public class TrasladoController {
     }
     
     @PutMapping("/{trasladoId}/confirmar-recepcion")
-    public ResponseEntity<Traslado> confirmarRecepcion(@PathVariable Long trasladoId, @RequestParam(required = false) String observaciones) {
+    public ResponseEntity<Traslado> confirmarRecepcion(@PathVariable("trasladoId") Long trasladoId, @RequestParam(required = false) String observaciones) {
         logger.info("PUT /api/traslados/{}/confirmar-recepcion", trasladoId);
         try {
             Traslado traslado = trasladoService.confirmarRecepcion(trasladoId, observaciones);
@@ -68,7 +68,7 @@ public class TrasladoController {
     }
     
     @GetMapping("/{trasladoId}")
-    public ResponseEntity<Traslado> obtenerTraslado(@PathVariable Long trasladoId) {
+    public ResponseEntity<Traslado> obtenerTraslado(@PathVariable("trasladoId") Long trasladoId) {
         logger.info("GET /api/traslados/{}", trasladoId);
         Traslado traslado = trasladoService.obtenerPorId(trasladoId);
         if (traslado == null) {

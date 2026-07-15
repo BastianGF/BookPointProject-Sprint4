@@ -38,7 +38,7 @@ public class ProveedorController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Proveedor> buscar(@PathVariable Long id) {
+    public ResponseEntity<Proveedor> buscar(@PathVariable("id") Long id) {
         Proveedor p = proveedorService.buscarPorId(id).orElse(null);
         if (p == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(p, HttpStatus.OK);
@@ -55,21 +55,21 @@ public class ProveedorController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Proveedor> editar(@PathVariable Long id, @RequestBody Proveedor datos) {
+    public ResponseEntity<Proveedor> editar(@PathVariable("id") Long id, @RequestBody Proveedor datos) {
         Proveedor actualizado = proveedorService.editarProveedor(id, datos);
         if (actualizado == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(actualizado, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+    public ResponseEntity<Void> eliminar(@PathVariable("id") Long id) {
         if (!proveedorService.eliminarProveedor(id))
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @GetMapping("/{proveedorId}/historial-compras")
-    public ResponseEntity<List<HistorialCompraDTO>> obtenerHistorial(@PathVariable Long proveedorId) {
+    public ResponseEntity<List<HistorialCompraDTO>> obtenerHistorial(@PathVariable("proveedorId") Long proveedorId) {
         logger.info("GET /api/proveedores/{}/historial-compras", proveedorId);
         try {
             List<HistorialCompraDTO> historial = proveedorService.obtenerHistorialComprasPorProveedor(proveedorId);
@@ -84,7 +84,7 @@ public class ProveedorController {
 
     @PostMapping("/{proveedorId}/historial-compras")
     public ResponseEntity<HistorialCompraDTO> registrarCompra(
-            @PathVariable Long proveedorId,
+            @PathVariable("proveedorId") Long proveedorId,
             @Valid @RequestBody HistorialCompraDTO compra) {
         logger.info("POST /api/proveedores/{}/historial-compras", proveedorId);
         try {

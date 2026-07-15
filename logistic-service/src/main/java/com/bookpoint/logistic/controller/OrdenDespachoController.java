@@ -31,7 +31,7 @@ public class OrdenDespachoController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<OrdenDespacho> buscar(@PathVariable Long id) {
+    public ResponseEntity<OrdenDespacho> buscar(@PathVariable("id") Long id) {
         OrdenDespacho o = ordenDespachoService.buscarPorId(id).orElse(null);
         if (o == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(o, HttpStatus.OK);
@@ -56,14 +56,14 @@ public class OrdenDespachoController {
     }
 
     @PutMapping("/{id}/confirmar")
-    public ResponseEntity<OrdenDespacho> confirmar(@PathVariable Long id) {
+    public ResponseEntity<OrdenDespacho> confirmar(@PathVariable("id") Long id) {
         OrdenDespacho orden = ordenDespachoService.confirmarDespacho(id);
         if (orden == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(orden, HttpStatus.OK);
     }
 
     @PutMapping("/{id}/cancelar")
-    public ResponseEntity<OrdenDespacho> cancelar(@PathVariable Long id) {
+    public ResponseEntity<OrdenDespacho> cancelar(@PathVariable("id") Long id) {
         OrdenDespacho orden = ordenDespachoService.cancelarDespacho(id);
         if (orden == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(orden, HttpStatus.OK);
@@ -71,7 +71,7 @@ public class OrdenDespachoController {
 
     @PutMapping("/{ordenId}/preparar-mercaderia")
     public ResponseEntity<OrdenDespacho> prepararMercaderia(
-            @PathVariable Long ordenId,
+            @PathVariable("ordenId") Long ordenId,  // ✅ CORREGIDO
             @RequestParam String ubicacionBodega,
             @RequestParam Integer cantidadConfirmada) {
         logger.info("PUT /api/ordenes-despacho/{}/preparar-mercaderia", ordenId);
@@ -80,7 +80,7 @@ public class OrdenDespachoController {
 
     @PutMapping("/{ordenId}/registrar-salida-bodega")
     public ResponseEntity<OrdenDespacho> registrarSalidaBodega(
-            @PathVariable Long ordenId,
+            @PathVariable("ordenId") Long ordenId,  // ✅ CORREGIDO
             @RequestParam Long transportistaId,
             @RequestParam Integer cantidadFinal) {
         logger.info("PUT /api/ordenes-despacho/{}/registrar-salida-bodega", ordenId);

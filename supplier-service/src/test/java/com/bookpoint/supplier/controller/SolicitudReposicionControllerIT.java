@@ -49,7 +49,7 @@ class SolicitudReposicionControllerIT {
     private SolicitudReposicion crearSolicitudValida() {
         SolicitudReposicion solicitud = new SolicitudReposicion();
         solicitud.setFechaSolicitud(new Date());
-        solicitud.setEstadoSolicitud("PENDIENTE");  // ✅ AGREGADO
+        solicitud.setEstadoSolicitud("PENDIENTE");
         solicitud.setCantidadSolicitada(15);
         return solicitud;
     }

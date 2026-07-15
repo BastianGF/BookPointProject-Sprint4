@@ -51,7 +51,7 @@ public class EvaluacionProveedorController {
     }
 
     @PostMapping("/{evaluacionId}/reporte")
-    public ResponseEntity<ReporteEvaluacion> generarReporte(@PathVariable Long evaluacionId, @Valid @RequestBody ReporteEvaluacion reporte) {
+    public ResponseEntity<ReporteEvaluacion> generarReporte(@PathVariable("evaluacionId") Long evaluacionId, @Valid @RequestBody ReporteEvaluacion reporte) {
         logger.info("POST /api/evaluaciones/{}/reporte", evaluacionId);
         try {
             ReporteEvaluacion nuevo = evaluacionService.generarReporteParaEvaluacion(evaluacionId, reporte);

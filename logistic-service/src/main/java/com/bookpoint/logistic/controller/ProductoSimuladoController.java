@@ -58,7 +58,7 @@ public class ProductoSimuladoController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Map<String, Object>> obtenerProductoPorId(@PathVariable Integer id) {
+    public ResponseEntity<Map<String, Object>> obtenerProductoPorId(@PathVariable("id") Integer id) {
         List<Map<String, Object>> productos = getProductos();
         Optional<Map<String, Object>> producto = productos.stream()
                 .filter(p -> p.get("id").equals(id))

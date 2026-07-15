@@ -6,7 +6,9 @@ import com.bookpoint.logistic.model.Transportista;
 import com.bookpoint.logistic.repository.EnvioRepository;
 import com.bookpoint.logistic.repository.IncidenciaRepository;
 import com.bookpoint.logistic.repository.OrdenDespachoRepository;
+import com.bookpoint.logistic.repository.RutaRepository;
 import com.bookpoint.logistic.repository.TransportistaRepository;
+import com.bookpoint.logistic.repository.TrasladoRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,6 +49,10 @@ class OrdenDespachoControllerIT {
     private EnvioRepository envioRepository;
     @Autowired
     private IncidenciaRepository incidenciaRepository;
+    @Autowired
+    private RutaRepository rutaRepository;
+    @Autowired
+    private TrasladoRepository trasladoRepository;
 
     @MockBean
     private RestTemplate restTemplate;
@@ -56,6 +62,8 @@ class OrdenDespachoControllerIT {
         incidenciaRepository.deleteAll();
         envioRepository.deleteAll();
         ordenDespachoRepository.deleteAll();
+        rutaRepository.deleteAll();
+        trasladoRepository.deleteAll();
         transportistaRepository.deleteAll();
     }
     

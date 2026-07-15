@@ -36,7 +36,7 @@ public class TransportistaController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Transportista> buscar(@PathVariable Long id) {
+    public ResponseEntity<Transportista> buscar(@PathVariable("id") Long id) {
         Transportista t = transportistaService.obtainPorId(id);
         if (t == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(t, HttpStatus.OK);
@@ -53,21 +53,21 @@ public class TransportistaController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Transportista> editar(@Valid @PathVariable Long id, @RequestBody Transportista datos) {
+    public ResponseEntity<Transportista> editar(@Valid @PathVariable("id") Long id, @RequestBody Transportista datos) {
         Transportista actualizado = transportistaService.updateTransportista(id, datos);
         if (actualizado == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(actualizado, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+    public ResponseEntity<Void> eliminar(@PathVariable("id") Long id) {
         if (!transportistaService.deleteTransportista(id))
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @PostMapping("/{transportistaId}/rutas")
-    public ResponseEntity<Ruta> asignarRuta(@PathVariable Long transportistaId, @Valid @RequestBody Ruta ruta) {
+    public ResponseEntity<Ruta> asignarRuta(@PathVariable("transportistaId") Long transportistaId, @Valid @RequestBody Ruta ruta) {
         logger.info("POST /api/transportistas/{}/rutas", transportistaId);
         return new ResponseEntity<>(rutaService.asignarRutaATransportista(transportistaId, ruta), HttpStatus.CREATED);
     }
@@ -83,7 +83,7 @@ public class TransportistaController {
     }
 
     @GetMapping("/{rutaId}/ruta")
-    public ResponseEntity<Ruta> obtenerRuta(@PathVariable Long rutaId) {
+    public ResponseEntity<Ruta> obtenerRuta(@PathVariable("rutaId") Long rutaId) {
         logger.info("GET /api/transportistas/{}/ruta", rutaId);
         Ruta ruta = rutaService.buscarPorId(rutaId).orElse(null);
         if (ruta == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -91,7 +91,7 @@ public class TransportistaController {
     }
 
     @PutMapping("/{rutaId}/ruta")
-    public ResponseEntity<Ruta> actualizarRuta(@PathVariable Long rutaId, @Valid @RequestBody Ruta datos) {
+    public ResponseEntity<Ruta> actualizarRuta(@PathVariable("rutaId") Long rutaId, @Valid @RequestBody Ruta datos) {
         try {
             return new ResponseEntity<>(rutaService.actualizarRuta(rutaId, datos), HttpStatus.OK);
         } catch (RuntimeException e) {
@@ -100,7 +100,7 @@ public class TransportistaController {
     }
 
     @PatchMapping("/{id}/reactivar")
-    public ResponseEntity<Transportista> reactivarTransportista(@PathVariable Long id) {
+    public ResponseEntity<Transportista> reactivarTransportista(@PathVariable("id") Long id) {
         try {
             Transportista reactivado = transportistaService.reactivarTransportista(id);
             return new ResponseEntity<>(reactivado, HttpStatus.OK);

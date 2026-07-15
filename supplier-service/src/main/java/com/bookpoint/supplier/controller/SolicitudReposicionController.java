@@ -27,7 +27,7 @@ public class SolicitudReposicionController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<SolicitudReposicion> buscar(@PathVariable Long id) {
+    public ResponseEntity<SolicitudReposicion> buscar(@PathVariable("id") Long id) {
         SolicitudReposicion s = solicitudService.buscarPorId(id).orElse(null);
         if (s == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(s, HttpStatus.OK);
